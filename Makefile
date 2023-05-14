@@ -1,4 +1,4 @@
-CXXFLAGS=-g -Wall -Wextra `pkg-config --cflags gtk+-3.0`
+CXXFLAGS=-g `pkg-config --cflags gtk+-3.0`
 LDFLAGS=`pkg-config --libs gtk+-3.0` -lxerces-c
 OBJ_DIR  := ./obj
 TARGET   := parse
