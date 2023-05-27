@@ -150,8 +150,9 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="AddToTheListButton">
-                    <property name="label" translatable="yes">Add to the list</property>
+                  <object class="GtkButton" id="RememberButton">
+                    <property name="label" translatable="yes">Remember</property>
+                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                   </object>
@@ -161,8 +162,8 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="SelectButton">
-                    <property name="label" translatable="yes">Select list</property>
+                  <object class="GtkButton" id="LoadListButton">
+                    <property name="label" translatable="yes">Load list</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                   </object>

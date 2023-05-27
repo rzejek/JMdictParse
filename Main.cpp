@@ -4,6 +4,7 @@
 
 #include "Entry.h"
 #include "DictionaryParse.h"
+#include "Utils.h"
 
 #include <xercesc/parsers/SAXParser.hpp>
 #include <xercesc/sax/HandlerBase.hpp>
@@ -18,17 +19,22 @@ GtkLabel * LabelGloss3= NULL;
 DictionaryParse * Handler = NULL;
 
 GtkButton * SearchButton = NULL;
+GtkButton * RememberButton = NULL;
 GObject* SearchWindow = NULL;
 GtkEntry * SearchEntry = NULL;
 GtkListBox * EntryList = NULL;
 bool ShowSearch = false;
+
 std::vector<Entry > FoundEntries;
+Entry CurrentEntry;
+std::vector<Entry > RememberedEntries;
+DictionaryParse * RememberHandler = NULL;
 
 GObject* MainWindow = NULL;
 
 using namespace std;
 
-int FillDictionary(const char * xmlFile)
+int FillDictionary(const char * xmlFile, DictionaryParse * Handler)
 {
     try {
         XMLPlatformUtils::Initialize();
@@ -46,11 +52,12 @@ int FillDictionary(const char * xmlFile)
 //    parser->setDoValidation(true);
 //    parser->setDoNamespaces(true);    // optional
 
-    Handler = new DictionaryParse();
     DocumentHandler* docHandler = Handler;
     ErrorHandler* errHandler = (ErrorHandler*)Handler;
     parser->setDocumentHandler(docHandler);
     parser->setErrorHandler(errHandler);
+
+    int err = 0;
 
     try {
         parser->parse(xmlFile);
@@ -60,24 +67,29 @@ int FillDictionary(const char * xmlFile)
         cout << "Exception message is: \n"
             << message << "\n";
         XMLString::release(&message);
-        return -1;
+        err = 1;
     }
     catch (const SAXParseException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
         cout << "Exception message is: \n"
             << message << "\n";
         XMLString::release(&message);
-        return -1;
+        err = 2;
     }
     catch (...) {
         cout << "Unexpected Exception \n" ;
-        return -1;
+        err = 3;
     }
+
+    delete parser;
+    return err;
 
 }
 
 void SetEntry(Entry & entry)
 {
+    CurrentEntry = entry;
+
     gtk_label_set_text_with_mnemonic(LabelKanji, entry.Kanji.c_str());
     gtk_label_set_text_with_mnemonic(LabelRomaji, entry.Romaji.c_str());
     if (entry.Glossary.size() > 0) 
@@ -94,12 +106,19 @@ void SetEntry(Entry & entry)
         gtk_label_set_text_with_mnemonic(LabelGloss3, "");
 }
 
+void RememberEntry(Entry & entry)
+{
+    RememberedEntries.push_back(entry);
+    SaveDictionaryToFile(RememberedEntries, "remember.xml");
+}
+
 void next_clicked(GtkWidget *widget, gpointer data) 
 {
-//    std::cout << "Handler: " << Handler << " size: " << Handler->Dictionary.size() << endl;
     int num = (rand() % Handler->Dictionary.size());
     Entry & entry = Handler->Dictionary[num];
     SetEntry(entry);
+
+//    std::cout << "Handler->Dictionary.size() == " << Handler->Dictionary.size() << std::endl;
 }
 
 void search_click(GtkWidget *widget, gpointer data)
@@ -111,6 +130,11 @@ void search_click(GtkWidget *widget, gpointer data)
         gtk_widget_hide(GTK_WIDGET(SearchWindow));
 }
 
+void remember_click(GtkWidget *widget, gpointer data)
+{
+    RememberEntry(CurrentEntry);
+}
+
 void search_activate(GtkWidget *widget, gpointer data)
 {
     int size = Handler->Dictionary.size();
@@ -119,6 +143,12 @@ void search_activate(GtkWidget *widget, gpointer data)
     const gchar *text = gtk_entry_get_text(GTK_ENTRY(widget));
 
     FoundEntries.clear();
+
+    GList *children, *iter;
+    children = gtk_container_get_children(GTK_CONTAINER(EntryList));
+    for(iter = children; iter != NULL; iter = g_list_next(iter))
+        gtk_widget_destroy(GTK_WIDGET(iter->data));
+    g_list_free(children);
 
     int i = 0;
     while (it != Handler->Dictionary.end())
@@ -160,14 +190,21 @@ int main(int argc, char** argv)
 {
     srand(time(NULL));
 
-    char* xmlFile = "JMdict_e";
+    const char* xmlFile = "JMdict_e";
     std::cout << "argc:"  << argc << endl;
     if (argc == 2) 
     {
         xmlFile = argv[1];
         std::cout << "argv:"  << argv[1] << endl;
     }
-    FillDictionary(xmlFile);
+
+    Handler = new DictionaryParse();
+    FillDictionary(xmlFile, Handler);
+
+    RememberHandler = new DictionaryParse();
+    FillDictionary("remember.xml", RememberHandler);
+    RememberedEntries = RememberHandler->Dictionary;
+
 
     gtk_init(&argc, &argv);
 
@@ -197,6 +234,9 @@ int main(int argc, char** argv)
     g_signal_connect(G_OBJECT(SearchButton), "clicked", G_CALLBACK(search_click), NULL);
     g_signal_connect(G_OBJECT(SearchEntry), "activate", G_CALLBACK(search_activate), NULL);
     g_signal_connect(G_OBJECT(EntryList), "row-selected", G_CALLBACK(found_row_selected), NULL);
+
+    RememberButton = GTK_BUTTON(gtk_builder_get_object(builder, "RememberButton"));
+    g_signal_connect(G_OBJECT(RememberButton), "clicked", G_CALLBACK(remember_click), NULL);
 
     // Connect the signal handlers defined in the glade file.
     // (Note: if you're looking for the c++ way to do this, there's no

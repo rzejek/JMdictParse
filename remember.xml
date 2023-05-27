@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JMdict>
+<entry>
+<k_ele>
+<keb>愛犬</keb>
+</k_ele>
+<r_ele>
+<reb>あいけん</reb>
+</r_ele>
+<sense>
+<gloss>pet dog</gloss>
+<gloss>beloved dog</gloss>
+<gloss>love of dogs</gloss>
+<gloss>fondness for dogs</gloss>
+</sense>
+</entry>
+<entry>
+<k_ele>
+<keb>空色</keb>
+</k_ele>
+<r_ele>
+<reb>そらいろ</reb>
+</r_ele>
+<sense>
+<gloss>sky-blue</gloss>
+</sense>
+</entry>
+<entry>
+<k_ele>
+<keb>黄いろい</keb>
+</k_ele>
+<r_ele>
+<reb>きいろい</reb>
+</r_ele>
+<sense>
+<gloss>yellow</gloss>
+<gloss>high-pitched (voice)</gloss>
+<gloss>shrill</gloss>
+</sense>
+</entry>
+</JMdict>

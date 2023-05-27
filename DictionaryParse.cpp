@@ -24,7 +24,19 @@ void DictionaryParse::startElement(const XMLCh* const name,
     char* message = XMLString::transcode(name);
 
     if (strcmp(message, "entry") == 0) 
+    {
         isEntry = true;
+        if (isEntry)
+        {
+            isEntry = false;
+            to_save = false;
+            CurrentValue.Glossary.clear();
+            CurrentValue.Kanji = "";
+            CurrentValue.Romaji = "";
+
+            Dictionary.push_back(CurrentValue);
+        }
+    }
     if (strcmp(message, "k_ele") == 0) 
         isK_ele = true;
     if (strcmp(message, "keb") == 0) 
@@ -56,7 +68,7 @@ void DictionaryParse::characters(const XMLCh *const chars, const XMLSize_t lengt
         int len = strlen(message);
 //        if (len == 3)
         {
-            Current.Kanji = std::string(message);
+            Dictionary[Dictionary.size() - 1].Kanji = std::string(message);
 //            cout << message << endl;
             to_save = true;
         }
@@ -64,21 +76,13 @@ void DictionaryParse::characters(const XMLCh *const chars, const XMLSize_t lengt
     }
     if (isReb)
     {
-        Current.Romaji = std::string(message);
+        Dictionary[Dictionary.size() - 1].Romaji = std::string(message);
         isReb = false;
     }
     if (isGloss)
     {
-        Current.Glossary.push_back(std::string(message));
+        Dictionary[Dictionary.size() - 1].Glossary.push_back(std::string(message));
         isGloss = false;
-    }
-    if (isEntry)
-    {
-        if (to_save)
-            Dictionary.push_back(Current);
-        isEntry = false;
-        to_save = false;
-        Current.Glossary.clear();
     }
 
     XMLString::release(&message);

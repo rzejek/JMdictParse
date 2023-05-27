@@ -27,7 +27,8 @@ private:
     bool isReb;
     bool isGloss;
 
-    Entry Current;
+    Entry CurrentValue;
+
     bool to_save;
 };
 
