@@ -1,3 +1,5 @@
+#pragma once
+
 #include <xercesc/sax/HandlerBase.hpp>
 
 #include "Entry.h"
@@ -23,6 +25,7 @@ private:
     bool isEntry;
     bool isK_ele;
     bool isKeb;
+    bool isKeb2;
     bool isSense;
     bool isReb;
     bool isGloss;

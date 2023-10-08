@@ -8,6 +8,7 @@ DictionaryParse::DictionaryParse()
     isEntry = false;
     isK_ele = false;
     isKeb = false;
+    isKeb2 = false;
     isSense = false;
     isReb = false;
     isGloss = false;
@@ -30,8 +31,17 @@ void DictionaryParse::startElement(const XMLCh* const name,
         {
             isEntry = false;
             to_save = false;
+            
+            isKeb2 = false;
+            isKeb = false;
+            isK_ele = false;
+            isSense = false;
+            isReb = false;
+            isGloss = false;
+
             CurrentValue.Glossary.clear();
             CurrentValue.Kanji = "";
+            CurrentValue.Kanji2 = "";
             CurrentValue.Romaji = "";
 
             Dictionary.push_back(CurrentValue);
@@ -39,8 +49,11 @@ void DictionaryParse::startElement(const XMLCh* const name,
     }
     if (strcmp(message, "k_ele") == 0) 
         isK_ele = true;
-    if (strcmp(message, "keb") == 0) 
+    if (strcmp(message, "keb") == 0)
+    {
+        if (isKeb) isKeb2 = true;
         isKeb = true;
+    }
     if (strcmp(message, "sense") == 0) 
         isSense = true;
     if (strcmp(message, "reb") == 0) 
@@ -65,14 +78,16 @@ void DictionaryParse::characters(const XMLCh *const chars, const XMLSize_t lengt
     char* message = XMLString::transcode(chars);
     if (isKeb)
     {
-        int len = strlen(message);
-//        if (len == 3)
+        if (isKeb2)
+        {
+            int len = strlen(message);
+            Dictionary[Dictionary.size() - 1].Kanji2 = std::string(message);
+        }
+        else
         {
             Dictionary[Dictionary.size() - 1].Kanji = std::string(message);
-//            cout << message << endl;
-            to_save = true;
+            isKeb2 = true;
         }
-        isKeb = false;
     }
     if (isReb)
     {
@@ -97,8 +112,9 @@ void DictionaryParse::endEntity(const XMLCh* const name)
         isEntry = false;
     if (strcmp(message, "k_ele") == 0) 
         isK_ele = false;
-    if (strcmp(message, "keb") == 0) 
-        isKeb = false;
+    if (strcmp(message, "keb") == 0)
+    {
+    }
     if (strcmp(message, "sense") == 0) 
         isSense = false;
 
@@ -115,7 +131,8 @@ void DictionaryParse::endElement (const XMLCh *const uri, const XMLCh *const loc
     if (strcmp(message, "k_ele") == 0) 
         isK_ele = false;
     if (strcmp(message, "keb") == 0) 
-        isKeb = false;
+    {
+    }
     if (strcmp(message, "sense") == 0) 
         isSense = false;
 

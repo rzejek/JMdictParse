@@ -1,4 +1,5 @@
 #include "Utils.h"
+#include <string.h>
 
 using namespace std;
 
@@ -34,3 +35,35 @@ void SaveDictionaryToFile(std::vector<Entry > dictionary, const char* xmlFile)
     file << "</JMdict>" << endl;
 }
 
+
+Entry FindValueInDictionary(std::vector<Entry > & Dictionary, std::string value)
+{
+    Entry result;
+
+    for (int i = 0; i < Dictionary.size(); i++)
+    {
+        Entry & entry = Dictionary[i];
+        if (entry.Kanji.size() != value.size()) continue;
+
+        bool check = true;
+
+        for (int j = 0; j < entry.Kanji.size(); j++)
+        {
+            unsigned char byte1 =  entry.Kanji[j];
+            unsigned char byte2 =  value[j];
+            if (byte1 != byte2) 
+            {
+                check = false;
+                break;
+            }
+        }
+        if (!check) continue;
+        // if (entry.Kanji != value) continue;
+
+        result = entry;
+        // std::cout << "Entry found!" << std::endl;
+        break;
+    }
+
+    return result;
+}
